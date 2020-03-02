@@ -24,7 +24,7 @@ class Filter extends Factory
     protected $format = null;
 
     /**
-     * @var string|null enum types.
+     * @var array<String> $enums.
      */
     protected $enums = null;
 
@@ -97,7 +97,7 @@ class Filter extends Factory
     /**
      * Expect an array of enums given as input to the filter.
      *
-     * @param array $enums An array of all enums available for the field
+     * @param array<String> $enums An array of all enums available for the field
      *
      * @return $this
      */
