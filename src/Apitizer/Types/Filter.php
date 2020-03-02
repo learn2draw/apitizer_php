@@ -24,11 +24,23 @@ class Filter extends Factory
     protected $format = null;
 
     /**
+     * @var string|null enum types.
+     */
+    protected $enums = null;
+
+    /**
      * If we expect an array of values or just one.
      *
      * @var bool
      */
     protected $expectArray = false;
+
+    /**
+     * If we expect an enumerators.
+     *
+     * @var bool
+     */
+    protected $expectEnumerators = false;
 
     /**
      * @var callable
@@ -74,11 +86,32 @@ class Filter extends Factory
     public function expectMany(string $type, string $format = null): self
     {
         $this->expectArray = true;
+        $this->expectEnumerators = false;
         $this->type = $type;
         $this->format = $format;
 
         return $this;
     }
+
+
+    /**
+     * Expect an array of enums given as input to the filter.
+     *
+     * @param array $enums An array of all enums available for the field
+     *
+     * @return $this
+     */
+    public function expectEnumerators(string $type, array $enums): self
+    {
+        $this->expectEnumerators = true;
+        $this->expectArray = false;
+        $this->type = $type;
+        $this->enums = $enums;
+        //$this->description('Search based on the input enumerator');
+
+        return $this;
+    }
+    
 
     /**
      * Set the handler function to be used when applying the filter.
@@ -180,6 +213,15 @@ class Filter extends Factory
             return array_map(function ($value) {
                 return TypeCaster::cast($value, $this->type, $this->format);
             }, $input);
+        }
+
+        if ($this->expectEnumerators) {
+
+            if (! \in_array($input, $this->enums)) {
+                throw InvalidInputException::filterTypeError($this, $input);
+            }            
+
+            return TypeCaster::cast($input, $this->type, $this->format);
         }
 
         if (\is_array($input)) {
